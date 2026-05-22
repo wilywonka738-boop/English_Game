@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadQuest — English Reading Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1209;
+    --paper: #faf6ee;
+    --cream: #f0e9d6;
+    --amber: #e8a020;
+    --amber-dark: #b87510;
+    --green: #2d7a4f;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --red-light: #fdeaea;
+    --blue: #1a4b8c;
+    --blue-light: #e8f0fc;
+    --shadow: rgba(26,18,9,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(232,160,32,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 85% 75%, rgba(45,122,79,0.07) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a1209' fill-opacity='0.018'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ========== SCREENS ========== */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+
+  /* ========== WELCOME SCREEN ========== */
+  #welcome {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .welcome-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+
+  .welcome-title span {
+    color: var(--amber);
+    display: block;
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .welcome-subtitle {
+    font-size: 1.1rem;
+    color: #7a6a4e;
+    max-width: 480px;
+    line-height: 1.6;
+    margin: 1.5rem auto 3rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .welcome-cards {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 700px;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .info-card {
+    background: white;
+    border: 1.5px solid #e0d5c0;
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    text-align: left;
+    flex: 1;
+    min-width: 160px;
+    max-width: 200px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .info-card .icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .info-card strong { display: block; font-size: 1.2rem; font-family: 'Fraunces', serif; }
+  .info-card span { font-size: 0.82rem; color: #8a7a5e; }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 24px rgba(26,18,9,0.25);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .btn-start:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(26,18,9,0.3);
+  }
+
+  .btn-start:active { transform: translateY(0); }
+
+  /* ========== TOPIC SELECT ========== */
+  #topic-select {
+    min-height: 100vh;
+    padding: 3rem 2rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber-dark);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .section-desc {
+    margin-top: 0.8rem;
+    color: #7a6a4e;
+    font-size: 1rem;
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .topic-card {
+    background: white;
+    border: 2px solid #e0d5c0;
+    border-radius: 20px;
+    padding: 1.8rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topic-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.25s;
+    border-radius: 18px;
+  }
+
+  .topic-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--shadow);
+  }
+
+  .topic-card:hover::after { opacity: 0.03; }
+
+  .topic-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .topic-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .topic-desc {
+    font-size: 0.85rem;
+    color: #8a7a5e;
+    line-height: 1.5;
+  }
+
+  .topic-meta {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+    background: var(--cream);
+    color: #6a5a3e;
+    border: 1px solid #d5c8a8;
+  }
+
+  /* ========== GAME SCREEN ========== */
+  #game {
+    min-height: 100vh;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .game-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 860px;
+    margin: 0 auto 1.5rem;
+    padding: 0 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #7a6a4e;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0;
+    transition: color 0.2s;
+  }
+
+  .back-btn:hover { color: var(--ink); }
+
+  .progress-wrap {
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8a7a5e;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: #e0d5c0;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .score-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+  }
+
+  /* Reading passage */
+  .reading-card {
+    max-width: 860px;
+    margin: 0 auto 2rem;
+    background: white;
+    border: 1.5px solid #e0d5c0;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--shadow);
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .reading-header {
+    padding: 1.5rem 2rem 1.2rem;
+    border-bottom: 1.5px solid #f0e9d6;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .reading-topic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber-dark);
+    background: #fff8e8;
+    border: 1.5px solid #f0d080;
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+  }
+
+  .reading-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .reading-body {
+    padding: 1.8rem 2rem;
+    font-size: 1.02rem;
+    line-height: 1.85;
+    color: #2a2010;
+  }
+
+  .reading-body p { margin-bottom: 1rem; }
+  .reading-body p:last-child { margin-bottom: 0; }
+
+  /* Questions */
+  .questions-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .question-block {
+    background: white;
+    border: 1.5px solid #e0d5c0;
+    border-radius: 20px;
+    padding: 1.6rem;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.4s ease both;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .question-block.answered-correct {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+
+  .question-block.answered-wrong {
+    border-color: var(--red);
+    background: var(--red-light);
+  }
+
+  .q-number {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8a7a5e;
+    margin-bottom: 0.6rem;
+  }
+
+  .q-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.45;
+    margin-bottom: 1.2rem;
+    color: var(--ink);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  @media (max-width: 520px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    background: var(--paper);
+    border: 1.5px solid #d8cdb8;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-btn.correct {
+    background: var(--green-light);
+    border-color: var(--green);
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .option-btn.wrong {
+    background: var(--red-light);
+    border-color: var(--red);
+    color: var(--red);
+    font-weight: 600;
+  }
+
+  .option-btn.revealed {
+    background: var(--green-light);
+    border-color: var(--green);
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e0d5c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6a5a3e;
+    margin-top: 0.05rem;
+  }
+
+  .option-btn.correct .option-letter { background: var(--green); color: white; }
+  .option-btn.wrong .option-letter { background: var(--red); color: white; }
+  .option-btn.revealed .option-letter { background: var(--green); color: white; }
+
+  .feedback-msg {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .feedback-msg.show { display: block; }
+  .feedback-msg.correct { background: var(--green-light); color: var(--green); border: 1px solid #a8d8bc; }
+  .feedback-msg.wrong { background: var(--red-light); color: var(--red); border: 1px solid #f0b8b0; }
+
+  /* Submit / Next */
+  .game-actions {
+    max-width: 860px;
+    margin: 2rem auto 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.9rem 2rem;
+    border: 2px solid #d0c5a8;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--ink); }
+
+  /* ========== RESULTS SCREEN ========== */
+  #results {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .results-ring {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 2rem;
+  }
+
+  .results-ring svg { transform: rotate(-90deg); }
+
+  .results-ring .ring-bg { fill: none; stroke: #e0d5c0; stroke-width: 12; }
+  .results-ring .ring-fill {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 408;
+    stroke-dashoffset: 408;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .results-ring.animate .ring-fill { stroke-dashoffset: var(--offset); }
+  .results-ring.excellent .ring-fill { stroke: var(--green); }
+  .results-ring.good .ring-fill { stroke: var(--amber-dark); }
+
+  .results-score {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .results-score strong {
+    font-family: 'Fraunces', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .results-score span { font-size: 0.8rem; color: #8a7a5e; font-weight: 600; margin-top: 0.2rem; }
+
+  .results-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+  }
+
+  .results-message {
+    color: #7a6a4e;
+    font-size: 1rem;
+    max-width: 420px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  .results-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1.5px solid #e0d5c0;
+    border-radius: 100px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .results-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+  /* ========== ANIMATIONS ========== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .pop { animation: pop 0.3s ease; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: #c0b090; border-radius: 8px; }
+
+  /* Timer */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .timer-wrap.urgent { color: var(--red); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .hint-btn {
+    background: none;
+    border: 1.5px solid #d0c5a8;
+    border-radius: 100px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #8a7a5e;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .hint-btn:hover { border-color: var(--amber-dark); color: var(--amber-dark); }
+  .hint-text {
+    display: none;
+    margin-top: 0.7rem;
+    padding: 0.6rem 0.9rem;
+    background: #fff8e0;
+    border: 1px solid #f0d880;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #7a5c00;
+    line-height: 1.4;
+  }
+  .hint-text.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ====== WELCOME SCREEN ====== -->
+<div id="welcome" class="screen active">
+  <div class="logo-badge">📖 Intermediate English · Reading Challenge</div>
+  <h1 class="welcome-title">Read<span>Quest</span></h1>
+  <p class="welcome-subtitle">Sharpen your reading comprehension with real-world texts, tricky questions, and instant feedback. Pick a topic and dive in!</p>
+
+  <div class="welcome-cards">
+    <div class="info-card">
+      <div class="icon">📚</div>
+      <strong>8 Topics</strong>
+      <span>From science to pop culture</span>
+    </div>
+    <div class="info-card">
+      <div class="icon">🎯</div>
+      <strong>5 Questions</strong>
+      <span>Per reading passage</span>
+    </div>
+    <div class="info-card">
+      <div class="icon">💡</div>
+      <strong>Hints</strong>
+      <span>Available when stuck</span>
+    </div>
+    <div class="info-card">
+      <div class="icon">⭐</div>
+      <strong>Score</strong>
+      <span>Track your progress</span>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="showScreen('topic-select')">
+    Choose a Topic →
+  </button>
+</div>
+
+<!-- ====== TOPIC SELECT ====== -->
+<div id="topic-select" class="screen">
+  <div class="section-header">
+    <div class="section-label">Step 1 of 2</div>
+    <h2 class="section-title">What would you like<br>to read about?</h2>
+    <p class="section-desc">Each topic has a unique passage and 5 comprehension questions.</p>
+  </div>
+
+  <div class="topic-grid" id="topicGrid"></div>
+</div>
+
+<!-- ====== GAME SCREEN ====== -->
+<div id="game" class="screen">
+  <div class="game-topbar">
+    <button class="back-btn" onclick="showScreen('topic-select')">← Back to topics</button>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progressText">Question 0 / 5</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge">⭐ <span id="scoreDisplay">0</span> pts</div>
+  </div>
+
+  <div class="reading-card" id="readingCard">
+    <div class="reading-header">
+      <div>
+        <div class="reading-topic-badge" id="readingBadge"></div>
+        <h2 class="reading-title" id="readingTitle"></h2>
+      </div>
+    </div>
+    <div class="reading-body" id="readingBody"></div>
+  </div>
+
+  <div class="questions-wrap" id="questionsWrap"></div>
+
+  <div class="game-actions">
+    <button class="btn-secondary" onclick="showResults()">See My Results</button>
+    <button class="btn-primary" id="nextBtn" onclick="nextTopic()" style="display:none">Next Topic →</button>
+  </div>
+</div>
+
+<!-- ====== RESULTS SCREEN ====== -->
+<div id="results" class="screen">
+  <div class="results-ring" id="resultsRing">
+    <svg width="160" height="160" viewBox="0 0 160 160">
+      <circle class="ring-bg" cx="80" cy="80" r="65"/>
+      <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="65"/>
+    </svg>
+    <div class="results-score">
+      <strong id="finalScore">0</strong>
+      <span>/ <span id="maxScore">25</span> pts</span>
+    </div>
+  </div>
+
+  <h2 class="results-title" id="resultsTitle">Well done!</h2>
+  <p class="results-message" id="resultsMessage"></p>
+
+  <div class="results-stats">
+    <div class="stat-pill">✅ <span id="correctCount">0</span> correct</div>
+    <div class="stat-pill">❌ <span id="wrongCount">0</span> wrong</div>
+    <div class="stat-pill">📖 <span id="topicName">—</span></div>
+  </div>
+
+  <div class="results-actions">
+    <button class="btn-secondary" onclick="showScreen('topic-select')">Try Another Topic</button>
+    <button class="btn-primary" onclick="showScreen('welcome')">← Home</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  DATA — 8 Topics, each with passage + 5 questions
+// ============================================================
+const TOPICS = [
+  {
+    id: 'coffee',
+    emoji: '☕',
+    name: 'The Coffee Revolution',
+    desc: 'History, culture & the science behind your favorite brew.',
+    tags: ['Culture', 'Science', 'History'],
+    badge: '☕ Culture & Science',
+    title: 'How Coffee Conquered the World',
+    passage: `<p>Coffee is now one of the most consumed beverages on Earth, but its journey from a remote Ethiopian plateau to every city café took centuries of travel, politics, and passion. According to legend, a goat herder named Kaldi noticed his animals were unusually energetic after eating red berries from a certain bush. Curious, he brought the berries to a local monk, who brewed a drink from them — and stayed awake all night, alert and focused. Whether true or not, this story captures the moment humanity discovered caffeine.</p>
+<p>By the 15th century, coffee had reached the Arab world. In cities like Mecca and Cairo, coffeehouses — called <em>qahveh khaneh</em> — became gathering places for conversation, chess, and music. They were so popular that some rulers tried to ban coffee, fearing that free conversation was politically dangerous. The bans rarely lasted. Coffee had already become too important.</p>
+<p>European merchants brought coffee back in the 1600s, and coffeehouse culture exploded. In London, coffeehouses became informal business centers; Lloyds of London, the famous insurance company, actually began as a coffeehouse. The café culture of Paris helped spark intellectual movements. Coffee wasn't just a drink — it was fuel for ideas.</p>
+<p>Today, the global coffee industry is worth over $100 billion. Scientists have found that moderate coffee consumption — about 2 to 4 cups a day — is linked to a reduced risk of several diseases, including type 2 diabetes and Parkinson's disease. The secret lies in more than just caffeine: coffee contains hundreds of antioxidants and bioactive compounds that protect cells from damage. So the next time you take a sip, remember you're drinking 600 years of history.</p>`,
+    questions: [
+      {
+        q: "According to the legend, who first discovered the energizing effect of coffee berries?",
+        options: ["A merchant from Cairo", "A goat herder named Kaldi", "A London coffeehouse owner", "An Arab monk in Mecca"],
+        answer: 1,
+        hint: "Look at the first paragraph for the name mentioned in the legend.",
+        feedback: "Correct! The legend says Kaldi the goat herder noticed his animals were energetic after eating the berries."
+      },
+      {
+        q: "Why did some rulers try to ban coffee in the Arab world?",
+        options: ["It was too expensive to import", "It kept people awake at night", "They feared free conversation was dangerous", "It was considered unhealthy"],
+        answer: 2,
+        hint: "Check paragraph 2 — what were rulers worried about?",
+        feedback: "Right! Rulers feared that the free conversation happening in coffeehouses was politically dangerous."
+      },
+      {
+        q: "What famous company started as a London coffeehouse?",
+        options: ["Starbucks", "Costa Coffee", "Lloyds of London", "The Bank of England"],
+        answer: 2,
+        hint: "Paragraph 3 mentions a well-known insurance company.",
+        feedback: "Exactly! Lloyds of London, the insurance company, actually began as a coffeehouse."
+      },
+      {
+        q: "According to the text, what is the recommended moderate amount of coffee per day?",
+        options: ["1 cup", "5 to 6 cups", "2 to 4 cups", "More than 4 cups"],
+        answer: 2,
+        hint: "The last paragraph has specific numbers.",
+        feedback: "Correct! Scientists found that 2 to 4 cups a day is linked to health benefits."
+      },
+      {
+        q: "Based on the passage, which of these best describes the main idea?",
+        options: ["Coffee is harmful and was rightly banned", "Coffee's journey shaped culture, business, and health across centuries", "Coffeehouses were mainly places for chess and music", "The coffee industry is only about the drink itself"],
+        answer: 1,
+        hint: "Think about what the WHOLE passage is saying, not just one paragraph.",
+        feedback: "Excellent! The passage shows how coffee shaped culture, business, politics, and even health throughout history."
+      }
+    ]
+  },
+  {
+    id: 'deep-sea',
+    emoji: '🌊',
+    name: 'The Deep Ocean',
+    desc: 'Explore the mysterious world below 1,000 meters.',
+    tags: ['Science', 'Nature', 'Mystery'],
+    badge: '🌊 Ocean Science',
+    title: 'Life in the Deepest Dark',
+    passage: `<p>More people have walked on the moon than have visited the deepest point of Earth's oceans. The Mariana Trench, located in the Pacific Ocean, plunges nearly 11 kilometers below the surface — a depth so extreme that the pressure is over a thousand times greater than at sea level. Yet even here, in total darkness and near-freezing temperatures, life thrives.</p>
+<p>For decades, scientists believed that deep-sea life was sparse and simple. Without sunlight, photosynthesis is impossible, so where would the energy come from? The answer surprised everyone. In the 1970s, researchers discovered hydrothermal vents — cracks in the ocean floor that release super-heated water rich in chemicals. Around these vents, entire ecosystems flourish without any sunlight at all, powered by a process called <em>chemosynthesis</em>, where bacteria convert chemicals into energy instead of using light.</p>
+<p>The creatures living in these extreme environments are extraordinary. Giant tube worms can grow over two meters long. Anglerfish attract prey using a glowing lure that hangs from their heads. The vampire squid, despite its terrifying name, actually feeds on dead particles floating down from above — a process scientists call "marine snow." Many deep-sea animals produce their own light through bioluminescence, creating flashes and patterns to communicate, hunt, or confuse predators.</p>
+<p>Perhaps most importantly, the deep ocean may hold clues to life beyond Earth. If organisms can survive without sunlight, extreme pressure, and toxic chemicals on our own planet, similar life might exist in the ice-covered oceans of Jupiter's moon Europa. The deep sea isn't just a scientific frontier — it's a window into what life can be.</p>`,
+    questions: [
+      {
+        q: "How deep is the Mariana Trench, according to the text?",
+        options: ["About 5 kilometers", "About 8 kilometers", "Nearly 11 kilometers", "Exactly 15 kilometers"],
+        answer: 2,
+        hint: "The exact depth is mentioned in the first paragraph.",
+        feedback: "Correct! The Mariana Trench plunges nearly 11 kilometers below the surface."
+      },
+      {
+        q: "What was the surprising discovery made in the 1970s?",
+        options: ["Deep-sea fish can survive on land", "Hydrothermal vents support ecosystems without sunlight", "The Mariana Trench is getting deeper", "Marine snow contains plastic pollution"],
+        answer: 1,
+        hint: "Paragraph 2 describes a discovery that changed what scientists believed.",
+        feedback: "Right! Researchers discovered hydrothermal vents where ecosystems survive without sunlight through chemosynthesis."
+      },
+      {
+        q: "What does the vampire squid actually eat?",
+        options: ["Other squid", "Giant tube worms", "Dead particles floating down called 'marine snow'", "Bacteria from hydrothermal vents"],
+        answer: 2,
+        hint: "Look in paragraph 3 for details about the vampire squid's diet.",
+        feedback: "Correct! Despite its name, the vampire squid feeds on dead particles from above, called 'marine snow.'"
+      },
+      {
+        q: "Why does the text mention Jupiter's moon Europa?",
+        options: ["To show that deep-sea exploration is expensive", "To suggest life might exist there, similar to deep-sea organisms", "To compare ocean sizes between planets", "To explain how bioluminescence works"],
+        answer: 1,
+        hint: "The last paragraph draws a connection between deep-sea life and space exploration.",
+        feedback: "Excellent! The text suggests that if life survives extreme conditions on Earth, similar life might exist on Europa."
+      },
+      {
+        q: "What is 'bioluminescence' as used in the passage?",
+        options: ["The process of eating dead particles", "Converting chemicals into energy without sunlight", "The ability of animals to produce their own light", "A type of deep-sea pressure resistance"],
+        answer: 2,
+        hint: "Paragraph 3 describes what bioluminescence allows deep-sea animals to do.",
+        feedback: "Correct! Bioluminescence is the ability to produce light, used for communication, hunting, and defense."
+      }
+    ]
+  },
+  {
+    id: 'social-media',
+    emoji: '📱',
+    name: 'Social Media & Us',
+    desc: 'How platforms shape identity, news, and mental health.',
+    tags: ['Society', 'Technology', 'Psychology'],
+    badge: '📱 Digital Society',
+    title: 'The Double-Edged Scroll',
+    passage: `<p>Social media platforms have transformed how billions of people communicate, share information, and perceive themselves. As of 2024, the average person spends nearly two and a half hours per day on social media — more time than they spend eating, exercising, or socializing face-to-face. This radical shift in how we spend our attention has profound consequences, both positive and negative.</p>
+<p>On the positive side, social media has democratized information. Movements like #MeToo and the Arab Spring were organized and amplified through platforms that bypassed traditional media gatekeepers. Small businesses can reach global audiences with minimal investment. Friends separated by oceans can maintain daily connections. For people in isolated communities — due to geography, disability, or identity — social media can be a lifeline.</p>
+<p>However, the same algorithms designed to keep users engaged also have a darker side. They tend to promote content that triggers strong emotional reactions — particularly outrage — because angry users click more. This creates "filter bubbles" where people are mainly exposed to views that confirm their existing beliefs, making it harder to understand opposing perspectives. Misinformation spreads rapidly; studies have shown that false news travels six times faster on Twitter than true news.</p>
+<p>Mental health researchers have raised particular concerns about younger users. Studies show correlations between heavy social media use and increased rates of anxiety and depression, especially in teenage girls. The constant comparison to carefully curated highlight reels creates unrealistic standards. Yet the research is nuanced: passive scrolling appears more harmful than active engagement like posting or messaging. The question isn't just whether we use social media, but how.</p>`,
+    questions: [
+      {
+        q: "According to the text, how much time does the average person spend on social media daily?",
+        options: ["About one hour", "Nearly two and a half hours", "Exactly three hours", "More than four hours"],
+        answer: 1,
+        hint: "The first paragraph mentions a specific daily average.",
+        feedback: "Correct! The text says the average is nearly two and a half hours per day."
+      },
+      {
+        q: "What is a 'filter bubble' as described in the passage?",
+        options: ["A spam filter that removes false news", "A feature that limits daily screen time", "An environment where people mostly see content matching their existing views", "A bubble-style interface used by certain platforms"],
+        answer: 2,
+        hint: "Look at paragraph 3 — it defines this term in context.",
+        feedback: "Correct! A filter bubble is created by algorithms that mainly show content confirming users' existing beliefs."
+      },
+      {
+        q: "According to the text, how much faster does false news spread compared to true news on Twitter?",
+        options: ["Two times faster", "Three times faster", "Four times faster", "Six times faster"],
+        answer: 3,
+        hint: "Paragraph 3 includes a statistic from studies about false news.",
+        feedback: "Right! Studies show false news travels six times faster than true news on Twitter."
+      },
+      {
+        q: "Which group does the text identify as being particularly at risk from social media's mental health effects?",
+        options: ["Elderly users", "Small business owners", "Teenage girls", "People in rural communities"],
+        answer: 2,
+        hint: "Paragraph 4 discusses mental health and mentions a specific group.",
+        feedback: "Correct! Researchers raised particular concerns about teenage girls and increased rates of anxiety and depression."
+      },
+      {
+        q: "What does the research suggest about HOW we use social media?",
+        options: ["All social media use is equally harmful", "Using social media for news is the most harmful activity", "Passive scrolling is more harmful than active engagement", "Active posting causes more anxiety than scrolling"],
+        answer: 2,
+        hint: "The last sentence of the passage makes a distinction about types of use.",
+        feedback: "Excellent! Research suggests passive scrolling is more harmful than active engagement like posting or messaging."
+      }
+    ]
+  },
+  {
+    id: 'mars',
+    emoji: '🚀',
+    name: 'The Race to Mars',
+    desc: 'Humanity\'s next giant leap — challenges and ambitions.',
+    tags: ['Science', 'Space', 'Future'],
+    badge: '🚀 Space Exploration',
+    title: 'Why Mars? Humanity\'s Biggest Gamble',
+    passage: `<p>Mars is roughly 225 million kilometers from Earth on average — a journey that would take between six and nine months with current rocket technology. Yet governments and private companies are investing billions of dollars to send humans there within the next few decades. Why are we so obsessed with the Red Planet?</p>
+<p>The most practical reason is survival. Scientists predict that Earth faces existential risks — from climate change and asteroid impacts to pandemics and nuclear war. Becoming a "multi-planetary species" is, for some thinkers, the only long-term insurance policy for human civilization. Elon Musk has famously argued that humanity must become interplanetary to avoid extinction, and SpaceX's entire Mars program is built around this philosophy.</p>
+<p>But getting to Mars alive is only half the problem. The surface of Mars is a brutal environment: temperatures average around -60°C, the thin atmosphere provides almost no protection from cosmic radiation, and there is no liquid water on the surface. Astronauts would face health risks from radiation exposure, muscle and bone loss from reduced gravity, and severe psychological strain from isolation. Scientists are currently working on solutions — from underground habitats to radiation shields to special nutrition plans.</p>
+<p>There is also the question of what we might find. Mars has polar ice caps, evidence of ancient river valleys, and atmospheric methane whose source is unknown. Some scientists cautiously suggest that primitive microbial life might have existed — or might still exist — deep underground. Discovering even the simplest life on another planet would be one of the greatest scientific revelations in human history. Whether or not that day comes, the push toward Mars is reshaping aerospace technology, inspiring new generations, and challenging us to think beyond our own horizon.</p>`,
+    questions: [
+      {
+        q: "How long would a trip to Mars take with current rocket technology?",
+        options: ["About 3 months", "Between 6 and 9 months", "Exactly 1 year", "About 2 years"],
+        answer: 1,
+        hint: "The first paragraph gives this information directly.",
+        feedback: "Correct! With current technology, the journey would take between 6 and 9 months."
+      },
+      {
+        q: "What is the main reason given for wanting to send humans to Mars?",
+        options: ["To find alien civilizations", "To mine valuable minerals", "As a long-term survival plan for humanity", "To test new rocket engines"],
+        answer: 2,
+        hint: "Paragraph 2 explains the 'most practical reason.'",
+        feedback: "Right! The main practical reason is survival — making humanity 'multi-planetary' to avoid extinction-level risks."
+      },
+      {
+        q: "Which of these is NOT listed as a health risk for Mars astronauts?",
+        options: ["Radiation exposure", "Muscle and bone loss", "Extreme heat", "Psychological strain from isolation"],
+        answer: 2,
+        hint: "Paragraph 3 lists health risks. Look for what is NOT mentioned.",
+        feedback: "Correct! Extreme heat is not a risk — Mars is extremely cold, averaging -60°C. Extreme heat is not mentioned."
+      },
+      {
+        q: "Why is the methane in Mars's atmosphere significant?",
+        options: ["It is used as fuel for rockets", "Its source is unknown and might suggest life", "It protects the planet from asteroids", "It proves Mars once had oceans"],
+        answer: 1,
+        hint: "Check the last paragraph for what scientists say about Martian methane.",
+        feedback: "Excellent! Atmospheric methane with an unknown source is one reason scientists cautiously suggest life might have existed."
+      },
+      {
+        q: "What would be the significance of finding microbial life on Mars?",
+        options: ["It would prove Mars is suitable for human colonization", "It would be one of the greatest scientific revelations in history", "It would end the Mars exploration program", "It would confirm that Earth life came from Mars"],
+        answer: 1,
+        hint: "The final paragraph addresses this directly.",
+        feedback: "Correct! The text says discovering even simple life on another planet would be one of the greatest scientific revelations in history."
+      }
+    ]
+  },
+  {
+    id: 'music',
+    emoji: '🎵',
+    name: 'Music & The Brain',
+    desc: 'Why does music make us emotional? Science has answers.',
+    tags: ['Science', 'Psychology', 'Arts'],
+    badge: '🎵 Neuroscience',
+    title: 'Your Brain on Music',
+    passage: `<p>Music is perhaps the only human experience that simultaneously activates more brain regions than almost any other activity. When you listen to a song you love, your brain's auditory cortex processes the sound, your motor cortex responds to the rhythm, your emotional centers release dopamine, and your memory networks light up with associations. Music doesn't just enter our ears — it rewires our brain in real time.</p>
+<p>One of the most fascinating phenomena is called a "chills response" or "musical frisson" — the goosebumps or shivers that some people feel when hearing a particularly powerful piece of music. Research shows that people who experience this response have more nerve fibers connecting the auditory cortex to regions associated with emotional processing. In a sense, music literally moves them more. About 55% of people report experiencing musical frisson, suggesting that sensitivity to music varies between individuals.</p>
+<p>Music has measurable effects on performance and health. Surgeons who listened to music of their own choosing performed operations faster and more accurately than those who worked in silence. Athletes run faster and further when listening to motivational music — the music acts as a "metronome" that synchronizes movement and distracts from fatigue. Hospitals are increasingly using music therapy to reduce pain perception, lower anxiety before surgery, and even help stroke patients regain language abilities, since music and language share neural pathways.</p>
+<p>Perhaps most remarkably, musical memory is processed differently than other memories. People with severe Alzheimer's disease who cannot recognize their own family members often still remember songs from their youth perfectly. The part of the brain where musical memories are stored is one of the last to be affected by the disease. This discovery has led to powerful "music and memory" therapy programs in care homes around the world, using songs to reconnect patients with their past and themselves.</p>`,
+    questions: [
+      {
+        q: "What happens in the brain when you listen to a song you love?",
+        options: ["Only the auditory cortex is activated", "Multiple regions activate simultaneously", "Only emotional centers respond", "The memory network shuts down"],
+        answer: 1,
+        hint: "The first paragraph explains what happens in detail.",
+        feedback: "Correct! Multiple brain regions activate simultaneously — the auditory cortex, motor cortex, emotional centers, and memory networks."
+      },
+      {
+        q: "What is 'musical frisson'?",
+        options: ["A type of music therapy for Alzheimer's", "The effect of music on athletic performance", "Goosebumps or shivers felt when hearing powerful music", "The brain region that processes rhythm"],
+        answer: 2,
+        hint: "Paragraph 2 defines this term clearly.",
+        feedback: "Right! Musical frisson is the goosebumps or shivers response some people feel when hearing powerful music."
+      },
+      {
+        q: "What percentage of people experience musical frisson, according to the text?",
+        options: ["About 25%", "About 40%", "About 55%", "About 75%"],
+        answer: 2,
+        hint: "Look for a specific percentage in paragraph 2.",
+        feedback: "Correct! About 55% of people report experiencing musical frisson."
+      },
+      {
+        q: "How does music help athletes, according to the passage?",
+        options: ["It helps them breathe better", "It acts as a metronome and distracts from fatigue", "It increases their pain tolerance only", "It makes them more competitive"],
+        answer: 1,
+        hint: "Paragraph 3 describes two specific ways music helps athletes.",
+        feedback: "Excellent! Music synchronizes movement like a metronome and distracts from fatigue, helping athletes run faster and further."
+      },
+      {
+        q: "Why are musical memories significant for Alzheimer's patients?",
+        options: ["Music helps them recognize family members", "Musical memories are stored in a brain area unaffected by Alzheimer's", "They can only remember recent songs", "Music cures Alzheimer's disease over time"],
+        answer: 1,
+        hint: "The last paragraph explains what is special about where musical memories are stored.",
+        feedback: "Correct! The area storing musical memories is one of the last affected by Alzheimer's, so patients can still recall songs from their youth."
+      }
+    ]
+  },
+  {
+    id: 'food',
+    emoji: '🍜',
+    name: 'Global Food Culture',
+    desc: 'How street food, fusion, and tradition shape identity.',
+    tags: ['Culture', 'History', 'Food'],
+    badge: '🍜 Food & Culture',
+    title: 'We Are What We Eat',
+    passage: `<p>Food is never just about nutrition. It carries history, identity, memory, and power. The spices in your grandmother's recipe arrived in her country via trade routes centuries old. The fast food restaurant on your corner is a product of post-war American economics. Every dish tells a story about the people who created it and the world they lived in.</p>
+<p>Street food is one of the world's great equalizers. From Bangkok's night markets to Mexico City's taco stands and Mumbai's vada pav stalls, street food provides affordable, high-quality meals to millions while preserving culinary traditions that might otherwise disappear. UNESCO has recognized the cultural significance of various food traditions, including the Mexican cuisine and the Mediterranean diet, as intangible cultural heritage. The humble street vendor is, in many ways, a living museum.</p>
+<p>The concept of "fusion cuisine" — blending ingredients and techniques from different culinary traditions — is both celebrated and controversial. Critics argue that fusion can erase the cultural context of a dish, turning sacred or historically significant foods into trendy commercial products. Supporters counter that all cuisines are already fusions; Italian food didn't have tomatoes before Columbus, and Thai food didn't have chili peppers. Culinary boundaries have always been porous, shifting with every migration and trade route.</p>
+<p>Today, globalization has created new paradoxes. You can eat sushi in São Paulo, tacos in Tokyo, and biryani in Buenos Aires. Yet simultaneously, there's a growing "slow food" movement that pushes back against industrial homogenization, celebrating local ingredients, forgotten recipes, and the act of cooking as connection. The future of food may be both more global and more local at the same time — a reflection of a world navigating between unity and identity.</p>`,
+    questions: [
+      {
+        q: "According to the first paragraph, what does food carry besides nutrition?",
+        options: ["Only vitamins and minerals", "History, identity, memory, and power", "Chemical preservatives and flavor", "Global trade agreements"],
+        answer: 1,
+        hint: "The opening paragraph makes a clear list of what food carries.",
+        feedback: "Correct! The text says food carries history, identity, memory, and power."
+      },
+      {
+        q: "Why does the text call street food 'one of the world's great equalizers'?",
+        options: ["Because it is eaten by rich and poor alike", "Because it provides affordable meals while preserving culinary traditions", "Because it is recognized by the United Nations", "Because it tastes the same everywhere"],
+        answer: 1,
+        hint: "Paragraph 2 explains what makes street food an 'equalizer.'",
+        feedback: "Correct! Street food provides affordable, quality meals to millions while preserving culinary traditions."
+      },
+      {
+        q: "What example does the text use to show that all cuisines are already fusions?",
+        options: ["Japanese sushi adapted to other countries", "Italian food lacked tomatoes before Columbus", "Mexican cuisine recognized by UNESCO", "The spread of American fast food"],
+        answer: 1,
+        hint: "Look in paragraph 3 for a historical example about tomatoes.",
+        feedback: "Excellent! The text uses Italian food (no tomatoes before Columbus) and Thai food (no chili peppers originally) as examples."
+      },
+      {
+        q: "What is the 'slow food' movement's main goal?",
+        options: ["Making food take longer to prepare", "Celebrating local ingredients and forgotten recipes against industrial homogenization", "Banning international restaurant chains", "Slowing down fast food delivery services"],
+        answer: 1,
+        hint: "The last paragraph defines what the slow food movement celebrates.",
+        feedback: "Correct! The slow food movement celebrates local ingredients, forgotten recipes, and cooking as connection — pushing back against industrial homogenization."
+      },
+      {
+        q: "What does the text suggest about the future of food?",
+        options: ["Food will become fully standardized globally", "Local food traditions will completely disappear", "Food may be simultaneously more global AND more local", "Only fusion cuisine will survive"],
+        answer: 2,
+        hint: "The final sentence of the passage describes a possible future paradox.",
+        feedback: "Exactly! The text suggests the future may be both more global and more local — a paradox reflecting the tension between unity and identity."
+      }
+    ]
+  },
+  {
+    id: 'sleep',
+    emoji: '😴',
+    name: 'The Science of Sleep',
+    desc: 'Why you need it, what happens, and what lack of it does.',
+    tags: ['Health', 'Science', 'Biology'],
+    badge: '😴 Health Science',
+    title: 'Sleep: The Superpower You\'re Ignoring',
+    passage: `<p>Sleep is not a passive state of rest — it is one of the most active and important things your body does. During the roughly 8 hours of recommended nightly sleep, your brain goes through multiple cycles of distinct stages, each serving a critical function. Far from being "wasted time," sleep is when your body repairs muscle tissue, consolidates memories, regulates hormones, and clears toxic waste from the brain through a recently discovered system called the glymphatic system.</p>
+<p>The glymphatic system works almost exclusively during sleep, using cerebrospinal fluid to flush out waste products that accumulate between brain cells during waking hours. One of the most significant waste products it removes is beta-amyloid — a protein associated with Alzheimer's disease. Consistently poor sleep may allow this protein to build up, increasing long-term dementia risk. Scientists now believe that a good night's sleep may be one of the most powerful tools for protecting brain health over a lifetime.</p>
+<p>Sleep deprivation has dramatic short-term effects. After just 17 to 19 hours without sleep, cognitive performance drops to the equivalent of having a blood alcohol level of 0.05%. After 24 hours, this reaches 0.10% — legally drunk in most countries. Decision-making deteriorates, emotional regulation weakens, and reaction time slows. Yet surveys consistently show that millions of adults — particularly in high-income countries — regularly sleep fewer than 7 hours per night, often wearing their exhaustion as a badge of productivity.</p>
+<p>One underappreciated aspect of sleep is its role in creativity and problem-solving. Studies have shown that people who sleep on a problem are significantly more likely to find a creative solution than those who stay awake working on it. REM sleep — the stage associated with dreaming — appears to be particularly important for making novel connections between unrelated concepts. Some of history's greatest creative breakthroughs have reportedly come from dreams: from Kekulé's discovery of the benzene ring structure to Paul McCartney hearing the melody for "Yesterday" in his sleep.</p>`,
+    questions: [
+      {
+        q: "What does the glymphatic system do during sleep?",
+        options: ["It strengthens muscle tissue", "It flushes toxic waste from the brain using cerebrospinal fluid", "It regulates blood sugar levels", "It produces melatonin for deep sleep"],
+        answer: 1,
+        hint: "Paragraph 2 explains the glymphatic system's specific function.",
+        feedback: "Correct! The glymphatic system flushes waste products from between brain cells using cerebrospinal fluid."
+      },
+      {
+        q: "Why is poor sleep potentially linked to Alzheimer's disease?",
+        options: ["Sleep deprivation damages the hippocampus directly", "Poor sleep allows beta-amyloid proteins to build up in the brain", "Lack of sleep permanently reduces memory capacity", "Alzheimer's patients never sleep well"],
+        answer: 1,
+        hint: "Paragraph 2 explains what specific waste product is related to this risk.",
+        feedback: "Correct! Poor sleep allows beta-amyloid — linked to Alzheimer's — to build up in the brain."
+      },
+      {
+        q: "What does cognitive performance after 17-19 hours without sleep compare to?",
+        options: ["A person with a high fever", "A blood alcohol level of 0.05%", "A person after extreme exercise", "A blood alcohol level of 0.10%"],
+        answer: 1,
+        hint: "Paragraph 3 gives specific numbers about sleep deprivation effects.",
+        feedback: "Correct! After 17-19 hours without sleep, cognitive performance equals a blood alcohol level of 0.05%."
+      },
+      {
+        q: "What does the phrase 'wearing their exhaustion as a badge of productivity' mean?",
+        options: ["People use fitness trackers to measure their sleep", "People are proud of sleeping little and see it as a sign of hard work", "Exhausted workers receive recognition from their employers", "People wear uniforms to signal they work night shifts"],
+        answer: 1,
+        hint: "Think about the cultural attitude being described — why would someone 'wear' exhaustion?",
+        feedback: "Exactly! The phrase means people are proud of being sleep-deprived, treating it as proof they work hard."
+      },
+      {
+        q: "According to the passage, which sleep stage is most important for creativity?",
+        options: ["Deep slow-wave sleep", "The first sleep cycle only", "Light sleep in the early morning", "REM sleep associated with dreaming"],
+        answer: 3,
+        hint: "The last paragraph mentions a specific sleep stage connected to creativity.",
+        feedback: "Correct! REM sleep — the dreaming stage — appears most important for making novel creative connections."
+      }
+    ]
+  },
+  {
+    id: 'language',
+    emoji: '🗣️',
+    name: 'How Language Works',
+    desc: 'The biology, evolution, and magic of human communication.',
+    tags: ['Linguistics', 'Science', 'Culture'],
+    badge: '🗣️ Linguistics',
+    title: 'The Language Instinct',
+    passage: `<p>No other species on Earth communicates with the complexity, flexibility, and creativity of humans. Bees dance to indicate where flowers are; dolphins use signature whistles to identify themselves; great apes can learn hundreds of signs. But no animal strings symbols together according to abstract rules to discuss yesterday, tomorrow, hypothetical futures, or emotions they cannot directly point to. Language, in this sense, appears to be uniquely human.</p>
+<p>The evolutionary origins of language are fiercely debated. Most linguists believe that spoken language emerged between 50,000 and 100,000 years ago — roughly coinciding with a dramatic explosion in symbolic behavior evidenced by cave paintings, jewelry, and ceremonial burial. One popular theory suggests that language evolved from gesture, as early humans increasingly used their hands to communicate before shifting to vocalization. The discovery that Neanderthals possessed the same FOXP2 gene — linked to language ability in modern humans — suggests they may have had some form of complex communication too.</p>
+<p>Children acquire language in a remarkably consistent way across all cultures. Without formal instruction, babies babble in structured ways, develop grammar intuitively, and typically master the fundamentals of their native language by age four. Linguist Noam Chomsky famously proposed that humans are born with a "language acquisition device" — an innate mental structure that enables rapid language learning. While this specific model is debated, the evidence that humans are biologically prepared to acquire language is overwhelming.</p>
+<p>Language doesn't just describe reality — it shapes it. The Sapir-Whorf hypothesis suggests that the language we speak influences how we perceive and think about the world. Speakers of languages with more color terms can distinguish colors more quickly. Cultures whose language describes spatial relationships relative to the body ("the cup is to my left") vs. absolute directions ("the cup is to the north") develop different cognitive habits. Our words are not just labels — they are lenses through which we see everything.</p>`,
+    questions: [
+      {
+        q: "What makes human language different from animal communication?",
+        options: ["Humans communicate louder than animals", "Humans can discuss abstract concepts like past, future, and hypotheticals", "Only humans can communicate in groups", "Human language uses hand gestures exclusively"],
+        answer: 1,
+        hint: "The first paragraph explains what makes human language unique.",
+        feedback: "Correct! Humans can discuss abstract things like yesterday, tomorrow, hypotheticals, and emotions — something no other animal does."
+      },
+      {
+        q: "What does the discovery about Neanderthals' FOXP2 gene suggest?",
+        options: ["Neanderthals were more intelligent than modern humans", "Neanderthals may have had some form of complex communication", "Modern human language evolved from Neanderthals", "FOXP2 is not actually linked to language"],
+        answer: 1,
+        hint: "Paragraph 2 discusses what the Neanderthal FOXP2 discovery implies.",
+        feedback: "Correct! The shared FOXP2 gene suggests Neanderthals may have had some form of complex communication too."
+      },
+      {
+        q: "By what age do children typically master the fundamentals of their native language?",
+        options: ["By age two", "By age three", "By age four", "By age six"],
+        answer: 2,
+        hint: "Paragraph 3 gives a specific age.",
+        feedback: "Right! The text says children typically master the fundamentals of their native language by age four."
+      },
+      {
+        q: "What is the Sapir-Whorf hypothesis?",
+        options: ["Humans are born with an innate language device", "Language emerged from gesture in early humans", "The language we speak influences how we perceive the world", "All human languages share a universal grammar"],
+        answer: 2,
+        hint: "The last paragraph introduces and explains this hypothesis.",
+        feedback: "Excellent! The Sapir-Whorf hypothesis suggests the language we speak influences how we perceive and think about the world."
+      },
+      {
+        q: "Which example best supports the Sapir-Whorf hypothesis in the passage?",
+        options: ["Children learn language without formal instruction", "Speakers of languages with more color terms distinguish colors faster", "Neanderthals had the FOXP2 gene", "Language emerged 50,000 to 100,000 years ago"],
+        answer: 1,
+        hint: "The last paragraph gives specific examples of how language shapes perception.",
+        feedback: "Correct! Speakers with more color terms in their language distinguishing colors more quickly supports the idea that language shapes perception."
+      }
+    ]
+  }
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentTopic = null;
+let answeredCount = 0;
+let correctCount = 0;
+let score = 0;
+const MAX_SCORE_PER_Q = 5;
+
+// ============================================================
+//  SCREEN MANAGEMENT
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ============================================================
+//  TOPIC SELECT
+// ============================================================
+function buildTopicGrid() {
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML = TOPICS.map((t, i) => `
+    <div class="topic-card" onclick="startTopic(${i})" style="animation: fadeUp 0.4s ${i * 0.07}s ease both; opacity:0">
+      <span class="topic-emoji">${t.emoji}</span>
+      <div class="topic-name">${t.name}</div>
+      <div class="topic-desc">${t.desc}</div>
+      <div class="topic-meta">
+        ${t.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  START TOPIC
+// ============================================================
+function startTopic(idx) {
+  currentTopic = TOPICS[idx];
+  answeredCount = 0;
+  correctCount = 0;
+  score = 0;
+
+  // Populate reading
+  document.getElementById('readingBadge').textContent = currentTopic.badge;
+  document.getElementById('readingTitle').textContent = currentTopic.title;
+  document.getElementById('readingBody').innerHTML = currentTopic.passage;
+
+  // Build questions
+  buildQuestions();
+  updateProgress();
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  showScreen('game');
+}
+
+function buildQuestions() {
+  const wrap = document.getElementById('questionsWrap');
+  wrap.innerHTML = currentTopic.questions.map((q, qi) => `
+    <div class="question-block" id="qblock-${qi}" style="animation: fadeUp 0.4s ${qi * 0.1}s ease both; opacity:0">
+      <div class="q-number">Question ${qi + 1} of ${currentTopic.questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options-grid" id="opts-${qi}">
+        ${q.options.map((opt, oi) => `
+          <button class="option-btn" id="opt-${qi}-${oi}" onclick="selectAnswer(${qi}, ${oi})">
+            <span class="option-letter">${String.fromCharCode(65+oi)}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <button class="hint-btn" id="hint-btn-${qi}" onclick="toggleHint(${qi})">💡 Hint</button>
+      <div class="hint-text" id="hint-${qi}">${q.hint}</div>
+      <div class="feedback-msg" id="fb-${qi}"></div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  ANSWER LOGIC
+// ============================================================
+function selectAnswer(qi, oi) {
+  const q = currentTopic.questions[qi];
+  if (document.getElementById(`qblock-${qi}`).classList.contains('answered-correct') ||
+      document.getElementById(`qblock-${qi}`).classList.contains('answered-wrong')) return;
+
+  const allBtns = document.querySelectorAll(`#opts-${qi} .option-btn`);
+  allBtns.forEach(b => b.disabled = true);
+
+  const chosen = document.getElementById(`opt-${qi}-${oi}`);
+  const correct = document.getElementById(`opt-${qi}-${q.answer}`);
+  const fb = document.getElementById(`fb-${qi}`);
+  const block = document.getElementById(`qblock-${qi}`);
+
+  if (oi === q.answer) {
+    chosen.classList.add('correct');
+    block.classList.add('answered-correct');
+    fb.textContent = '✅ ' + q.feedback;
+    fb.className = 'feedback-msg show correct';
+    correctCount++;
+    score += MAX_SCORE_PER_Q;
+    document.getElementById('scoreDisplay').textContent = score;
+    document.getElementById('scoreDisplay').parentElement.classList.add('pop');
+    setTimeout(() => document.getElementById('scoreDisplay').parentElement.classList.remove('pop'), 400);
+  } else {
+    chosen.classList.add('wrong');
+    correct.classList.add('revealed');
+    block.classList.add('answered-wrong');
+    fb.textContent = '❌ Not quite. ' + q.feedback;
+    fb.className = 'feedback-msg show wrong';
+  }
+
+  // Hide hint if showing
+  document.getElementById(`hint-${qi}`).classList.remove('show');
+  document.getElementById(`hint-btn-${qi}`).style.display = 'none';
+
+  answeredCount++;
+  updateProgress();
+
+  if (answeredCount === currentTopic.questions.length) {
+    document.getElementById('nextBtn').style.display = 'inline-flex';
+  }
+}
+
+function toggleHint(qi) {
+  const hint = document.getElementById(`hint-${qi}`);
+  hint.classList.toggle('show');
+  document.getElementById(`hint-btn-${qi}`).textContent = hint.classList.contains('show') ? '🙈 Hide Hint' : '💡 Hint';
+}
+
+function updateProgress() {
+  const total = currentTopic.questions.length;
+  const pct = Math.round((answeredCount / total) * 100);
+  document.getElementById('progressText').textContent = `Question ${answeredCount} / ${total}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ============================================================
+//  NEXT TOPIC / RESULTS
+// ============================================================
+function nextTopic() { showScreen('topic-select'); }
+
+function showResults() {
+  const total = currentTopic.questions.length;
+  const maxPts = total * MAX_SCORE_PER_Q;
+  const pct = Math.round((score / maxPts) * 100);
+
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('maxScore').textContent = maxPts;
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = answeredCount - correctCount;
+  document.getElementById('topicName').textContent = currentTopic.name;
+
+  let title, msg;
+  if (pct === 100) { title = 'Perfect Score! 🏆'; msg = 'Outstanding! You understood every detail of the passage. Your reading comprehension is excellent!'; }
+  else if (pct >= 80) { title = 'Great Job! 🌟'; msg = 'You have a strong grasp of the text. Review the questions you missed and you\'ll be unstoppable.'; }
+  else if (pct >= 60) { title = 'Good Effort! 📖'; msg = 'Solid work! A second read of the passage might help you catch the details you missed.'; }
+  else { title = 'Keep Practicing! 💪'; msg = 'Reading comprehension improves with repetition. Try reading the passage again carefully before attempting another topic.'; }
+
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('resultsMessage').textContent = msg;
+
+  // Ring animation
+  const circumference = 408;
+  const offset = circumference - (pct / 100 * circumference);
+  const ring = document.getElementById('resultsRing');
+  ring.style.setProperty('--offset', offset);
+  ring.classList.remove('excellent', 'good', 'animate');
+
+  showScreen('results');
+  setTimeout(() => {
+    ring.classList.add('animate');
+    if (pct >= 80) ring.classList.add('excellent');
+    else if (pct >= 60) ring.classList.add('good');
+  }, 200);
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+buildTopicGrid();
+</script>
+</body>
+</html>
